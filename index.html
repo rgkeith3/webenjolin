@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    let ctx;
+
+    function createSynth() {
+      console.log("BUILDING THE BENJOLIN");
+      function createBenjolinOscillator(context, id) {
+        console.log("CONSTRUCTING OSCILLATOR");
+        const sine = context.createOscillator();
+        const square = context.createOscillator();
+        square.type = "square";
+        const fm = context.createGain();
+        fm.gain.value = 0;
+        fm.connect(sine.frequency);
+        fm.connect(square.frequency);
+
+        const rungler = context.createGain();
+        rungler.gain.value = 0;
+        rungler.connect(sine.frequency);
+        rungler.connect(square.frequency);
+        
+        sine.start();
+        square.start();
+
+        document.getElementById(id + "-frequency").oninput = function(ev) {
+          let freq = ev.currentTarget.value;
+          freq = Math.pow(freq, 3);
+
+          sine.frequency.setValueAtTime(freq, ctx.currentTime);
+          square.frequency.setValueAtTime(freq, ctx.currentTime);
+
+          requestAnimationFrame(() => document.querySelector("#" + id + " .hertz").innerText = freq);
+        }
+
+        document.getElementById(id +"-fm").oninput = function(ev) {
+          fm.gain.setValueAtTime(ev.currentTarget.value, ctx.currentTime);
+        }
+
+        document.getElementById(id +"-rungler").oninput = function(ev) {
+          rungler.gain.setValueAtTime(ev.currentTarget.value, ctx.currentTime);
+        }
+
+        return { sine, square, fm, rungler }
+      }
+
+      function createFilterSection(context, pwm) {
+        console.log("CONSTRUCTING FILTER SECTION");
+        const filter = context.createBiquadFilter();
+        filter.type = "lowpass";
+
+        const rungler = context.createGain();
+        rungler.gain.value = 0;
+        rungler.connect(filter.frequency);
+
+        document.querySelectorAll("input[name='filter-type']").forEach(element => {
+          element.onchange = () => filter.type = element.value;
+        });
+
+        document.getElementById("filter-frequency").oninput = function(ev) {
+          let freq = ev.currentTarget.value;
+          freq = Math.pow(freq, 3);
+
+          filter.frequency.setValueAtTime(freq, context.currentTime);
+          requestAnimationFrame(() => document.querySelector("#filter .hertz").innerText = freq);
+        };
+
+        document.getElementById("filter-q").oninput = function(ev) {
+          filter.Q.setValueAtTime(ev.currentTarget.value, context.currentTime);
+        };
+
+        document.getElementById("filter-rungler").oninput = function(ev) {
+          rungler.gain.setValueAtTime(ev.currentTarget.value, ctx.currentTime);
+        }
+
+        pwm.connect(filter);
+        
+        nodes["filter"] = filter;
+
+        createReverb(context);
+        createRungler(context, rungler);
+      }
+
+      async function createReverb(context) {
+        const convolver = context.createConvolver();
+        const ir = await fetch("AcademicQuadrangle.wav");
+        const arrayBuffer = await ir.arrayBuffer();
+        convolver.buffer = await context.decodeAudioData(arrayBuffer);
+
+        convolver.connect(context.destination);
+        nodes["reverb"] = convolver;
+        document.getElementById("filter-monitor").click();
+      }
+
+      function createRungler(context, filterRungler) {
+        context.audioWorklet.addModule('rungler.js').then(() => {
+          const rungler = new AudioWorkletNode(context, 'rungler', {numberOfInputs: 2});
+          osc1.square.connect(rungler, 0, 0);
+          osc2.square.connect(rungler, 0, 1);
+
+          rungler.connect(osc1.rungler);
+          rungler.connect(osc2.rungler);
+          rungler.connect(filterRungler);
+
+          const rungleParam = rungler.parameters.get('rungle')
+          document.getElementById("rungle").oninput = function(ev) {
+            rungleParam.setValueAtTime(ev.currentTarget.value, ctx.currentTime);
+          }
+        })
+      }
+
+      const ctx = new AudioContext();
+
+      
+      const gui = document.getElementById("gui");
+      
+      const osc1 = createBenjolinOscillator(ctx, "oscillator-1");
+      const osc2 = createBenjolinOscillator(ctx, "oscillator-2");
+      
+      osc1.sine.connect(osc2.fm);
+      osc2.sine.connect(osc1.fm);
+      
+      const nodes = {
+        "osc1-sine": osc1.sine,
+        "osc1-square": osc1.square,
+        "osc2-sine": osc2.sine,
+        "osc2-square": osc2.square
+      };
+      
+      let monitoring;
+      
+      document.querySelectorAll("input[name='monitor']").forEach(element => {
+        const node = element.value;
+        
+        element.onchange = () => {
+          if (monitoring) {
+            monitoring.disconnect(nodes.reverb);
+            monitoring.disconnect(ctx.destination);
+          }
+          nodes[node].connect(nodes.reverb);
+          nodes[node].connect(ctx.destination);
+          monitoring = nodes[node];
+        }
+      });
+
+      ctx.audioWorklet.addModule('comparator.js').then(() => {
+        const pwm = new AudioWorkletNode(ctx, 'comparator', {numberOfInputs: 2});
+        osc1.sine.connect(pwm, 0, 0);
+        osc2.sine.connect(pwm, 0, 1);
+        nodes["pwm"] = pwm;
+
+        createFilterSection(ctx, pwm);
+      });
+      
+      return ctx;
+    }
+
+    class Webenjolin {
+
+    }
+
+    benjolin = new Webenjolin();
+
+    onload = function() {
+
+      document.getElementById("start").onclick = function(ev) {
+        if (ctx && ctx.state == "running") {
+          ctx.suspend();
+          ev.currentTarget.innerText = "Start";
+        } else {
+          if (!ctx) {
+            ctx = createSynth();
+          }
+          ctx.resume();
+          ev.currentTarget.innerText = "Running!"
+        }
+      };
+    }
+  </script>
+</head>
+<body>
+  <h1>weBenjolin</h1>
+  <p>we Benjolin or Web-Benjolin?</p>
+  <p>both!</p>
+  <p>this is an implementation of the Benjolin synthesizer design by Rob Hordijk, based on his Blippy Box</p>
+  <p>it is a chaotic noise maker that shows off many cool synthesizer techniques like:</p>
+  <ol>
+    <li>frequency modulation</li>
+    <li>pulse waves as clock signals</li>
+    <li>sequencing via shift register</li>
+    <li>feedback</li>
+  </ol>
+  <p>this version is implemented using the WebAudio API</p>
+  <p>you may hear the terrible noise it makes and think it's broken, rest assured, it is working properly :)</p>
+  <p>Are You Ready?</p>
+  <button type="button" id="start">Start</button>
+  <div id="gui">
+    <div id="oscillator-1">
+      <h3>Osc 1</h3>
+      <label>Frequency: <span class="hertz">0</span>hz</label>
+      <br>
+      <input type="range" id="oscillator-1-frequency" min="0" max="25" step="0.001" value="6">
+      <input type="range" id="oscillator-1-fm" min="0" max="1000" value="0">
+      <input type="range" id="oscillator-1-rungler" min="0" max="1000" value="0">
+      <label>
+        Sine
+        <input type="radio" value="osc1-sine" name="monitor">
+      </label>
+      <label>
+        Square
+        <input type="radio" value="osc1-square" name="monitor">
+      </label>
+    </div>
+    <div id="oscillator-2">
+      <h3>Osc 2</h3>
+      <label>Frequency: <span class="hertz">0</span>hz</label>
+      <br>
+      <input type="range" id="oscillator-2-frequency" min="0" max="25" step="0.001" value="5">
+      <input type="range" id="oscillator-2-fm" min="0" max="1000" value="0">
+      <input type="range" id="oscillator-2-rungler" min="0" max="1000" value="0">
+      <label>
+        Sine
+        <input type="radio" value="osc2-sine" name="monitor">
+      </label>
+      <label>
+        Square
+        <input type="radio" value="osc2-square" name="monitor">
+      </label>
+    </div>
+    <div id="rungler">
+      <h3>Rungler</h3>
+      <label>Rungle</label>
+      <br>
+      <input type="range" id="rungle" min="0" max="1" step="0.01">
+    </div>
+    <div id="filter">
+      <h3>Filter</h3>
+      <label>Frequency: <span class="hertz">0</span>hz</label>
+      <br>
+      <input type="range" id="filter-frequency" min="0" max="25" step="0.001">
+      <input type="range" id="filter-q" min="0" max="25" step="0.1">
+      <input type="range" id="filter-rungler" min="0" max="1000" value="0">
+      <div>
+        <h5>Filter Type</h5>
+        <label>
+          Lowpass
+          <input type="radio" value="lowpass" name="filter-type" checked>
+        </label>
+        <label>
+          Highpass
+          <input type="radio" value="highpass" name="filter-type">
+        </label>
+        <label>
+          Bandpass
+          <input type="radio" value="bandpass" name="filter-type">
+        </label>
+      </div>
+      <label>
+        Filter
+        <input type="radio" value="filter" name="monitor" id="filter-monitor">
+      </label>
+    </div>
+    <div id="output">
+      <label>
+        PWM
+        <input type="radio" value="pwm" name="monitor">
+      </label>
+    </div>
+  </div>
+</body>
+</html>
