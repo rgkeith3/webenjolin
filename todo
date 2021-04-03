@@ -1,5 +1,5 @@
 build an oscilloscope that monitors what you're listening to
-re-factor / organize
+make sliders begin in reasonable positions that reflect what the actual params are
 style / dress it up
 add some info about each section, maybe when you monitor a differnt section, it explains whats happening on that output
 write a little 'info' page explaining what's happening behind the scenes with webaudio
