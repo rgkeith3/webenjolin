@@ -33,7 +33,7 @@ class Rungler extends AudioWorkletProcessor {
         this.register = this.register.slice(1) + sample;
 
         sign = this.register.slice(0,1) == "0" ? -1 : 1;
-        value = (parseInt(this.register.slice(1), 2) / 127) * sign;
+        value = (parseInt(this.register.slice(1), 2) / 127) * sign * 2;
       }
 
       output[i] = value;

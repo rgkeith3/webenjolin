@@ -2,7 +2,69 @@
 <html lang="en">
 <head>
   <script>
+    class Analyzer {
+      constructor(context) {
+        this.node = context.createAnalyser();
+        this.node.fftSize = 2048;
+        this.bufferLength = this.node.frequencyBinCount;
+        this.dataArray = new Uint8Array(this.bufferLength);  
+        
+        const canvas = document.querySelector('.visualizer');
+        this.width = canvas.width;
+        this.height = canvas.height;
+        this.canvasCtx = canvas.getContext("2d");
+      }
+
+      visualize() {
+        this.canvasCtx.clearRect(0, 0, this.width, this.height);
+        this.draw();
+      }
+
+      draw() {
+        requestAnimationFrame(this.draw.bind(this));
+        this.node.getByteTimeDomainData(this.dataArray);
+
+        this.canvasCtx.fillStyle = 'rgb(0, 0, 0)';
+        this.canvasCtx.fillRect(0, 0, this.width, this.height);
+
+        this.canvasCtx.lineWidth = 2;
+        this.canvasCtx.strokeStyle = 'rgb(0, 255, 0)';
+
+        this.canvasCtx.beginPath();
+
+        const sliceWidth = this.width * 1.0 / this.bufferLength;
+        let x = 0;
+
+        for(let i = 0; i < this.bufferLength; i++) {
+
+          const v = this.dataArray[i] / 128.0;
+          const y = v * this.height/2;
+
+          if(i === 0) {
+            this.canvasCtx.moveTo(x, y);
+          } else {
+            this.canvasCtx.lineTo(x, y);
+          }
+
+          x += sliceWidth;
+        }
+
+        this.canvasCtx.lineTo(this.width, this.height/2);
+        this.canvasCtx.stroke();
+      }
+    }
+
     class Webenjolin {
+      static infos = {
+        "osc1-sine": "Oscillator 1 has two outputs, a sine wave and a square wave. You are monitoring the sine wave. Oscillator 1's frequency is set by the initial frequency offset and modulated by Oscillator 2's sine wave and the Rungler output. Oscillator 1's sine wave in turn modulates Oscillator 2's frequency. Oscillator 1 and 2's sine waves are compared to create the Pulse Width Modulation output.",
+        "osc1-square": "Oscillator 1 has two outputs, a sine wave and a square wave. You are monitoring the square wave. Oscillator 1's frequency is set by the initial frequency offset and modulated by Oscillator 2's sine wave and the Rungler output. Oscillator 1's square wave is sampled by the Rungler to add bits to the Rungler's shift register.",
+        "osc2-sine": "Oscillator 2 has two outputs, a sine wave and a square wave. You are monitoring the sine wave. Oscillator 2's frequency is set by the initial frequency offset and modulated by Oscillator 1's sine wave and the Rungler output. Oscillator 2's sine wave in turn modulates Oscillator 1's frequency. Oscillator 1 and 2's sine waves are compared to create the Pulse Width Modulation output.",
+        "osc2-square": "Oscillator 2 has two outputs, a sine wave and a square wave. You are monitoring the square wave. Oscillator 2's frequency is set by the initial frequency offset and modulated by Oscillator 1's sine wave and the Rungler output. Oscillator 2's square wave is used as a clock for the Rungler, telling it when to sample Oscillator 1's square wave.",
+        "rungler": "The Rungler is a shift register that stores 8 bits. It's output is a signed 8 bit integer normalized to the range between -1 and 1. With each rising edge it recieves from Oscillator 2's square wave output, it removes the last bit from its register, shifts all the other bits by one position, and depending on a probability set by the 'Rungle' parameter, it will either move that last bit to the front of the register, or sample Oscillator 1's square wave output for a new bit. If Oscillator 1's wave is high, the bit will be a 1, if it is low, it will be a zero.",
+        "filter-filter": "The filter Section has three outputs, lowpass, highpass, and band pass. The filter's frequency is set by the initial frequency offset and modulated by the Rungler output. The filter's resonance is determined by the Q parameter. The signal being filtered, is the Pulse Width Modulation output.",
+        "pwm": "The Pulse Width Modulation output is the result of comparing Oscillator 1 and 2's sine waves. if Oscillator 1's sine wave is higher than Oscillator 2's sine wave, the PWM output is high. if Oscillator 1's sine wave is lower than Oscillator 2's sine wave, the PWM output is low.",
+      };
+
       isRunning() {
         return this.context && this.context.state == "running";
       }
@@ -22,18 +84,27 @@
         const nodes = nodepath.split("-");
         if (this.monitoring) {
           this.monitoring.disconnect(this.output);
+          this.monitoring.disconnect(this.analyzer.node);
         }
         let node = this.nodes;
         nodes.forEach(function(nodeName) {
           node = node[nodeName];
         });
 
+        this.updateInfo(nodepath);
         this.monitoring = node;
         this.monitoring.connect(this.output);
+        this.monitoring.connect(this.analyzer.node);
+      }
+
+      updateInfo(nodepath) {
+        this.infoPane.innerText = Webenjolin.infos[nodepath];
       }
 
       buildBenjolin() {
         this.context = new AudioContext();
+        this.analyzer = new Analyzer(this.context);
+        this.infoPane = document.getElementById("info");
         const osc1 = this.buildOscillatorSection("osc1");
         const osc2 = this.buildOscillatorSection("osc2");
         const filter = this.buildFilterSection();
@@ -46,6 +117,7 @@
           this.output = this.context.destination;
           this.wireItUp();
           this.attachListeners();
+          this.analyzer.visualize();
         });
       }
 
@@ -189,12 +261,15 @@
   <p>you may hear the terrible noise it makes and think it's broken, rest assured, it is working properly :)</p>
   <p>Are You Ready?</p>
   <button type="button" id="start">Start</button>
+  <canvas class="visualizer" width="640" height="100"></canvas>
+  <div id="info"></div>
   <div id="gui">
     <div id="osc1">
       <h3>Osc 1</h3>
-      <label>Frequency: <span class="hertz">0</span>hz</label>
-      <br>
-      <input type="range" id="osc1-frequency" min="0" max="25" step="0.001" value="6">
+      <label>Frequency: <span class="hertz">0</span>hz
+        <br>
+        <input type="range" id="osc1-frequency" min="0" max="25" step="0.001" value="6">
+      </label>
       <input type="range" id="osc1-fm" min="0" max="1000" value="0">
       <input type="range" id="osc1-rungler" min="0" max="1000" value="0">
       <label>
@@ -227,6 +302,7 @@
       <label>Rungle</label>
       <br>
       <input type="range" id="rungler-rungle" min="0" max="1" step="0.01">
+      <input type="radio" value="rungler" name="monitor">
     </div>
     <div id="filter">
       <h3>Filter</h3>
