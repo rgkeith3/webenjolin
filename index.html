@@ -1,6 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Goldman:wght@700&family=Montserrat&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: black;
+      width: 50%;
+      margin: auto;
+    }
+    .flex {
+      display: flex
+    }
+    .flex section {
+      flex-basis: 25%
+    }
+    .flex.column {
+      flex-direction: column;
+    }
+    h1, h2, h3, h5, button {
+      font-family: 'Goldman', cursive;
+      text-shadow: 0 0 5px greenyellow;
+    }
+    p, li, label {
+      font-family: 'Montserrat', sans-serif;
+      text-shadow: 0 0 10px white;
+    }
+    h1, h2, h3, h5, button, p, li, label {
+      color: white;
+    }
+    button {
+      background: black;
+      border: 1px solid white;
+    }
+  </style>
   <script>
     class Analyzer {
       constructor(context) {
@@ -28,7 +61,12 @@
         this.canvasCtx.fillRect(0, 0, this.width, this.height);
 
         this.canvasCtx.lineWidth = 2;
-        this.canvasCtx.strokeStyle = 'rgb(0, 255, 0)';
+        this.canvasCtx.strokeStyle = 'rgb(255, 255, 255)';
+
+        this.canvasCtx.shadowOffsetX = 0;
+        this.canvasCtx.shadowOffsetY = 0;
+        this.canvasCtx.shadowBlur = 5;
+        this.canvasCtx.shadowColor = 'rgb(0, 255, 0)';
 
         this.canvasCtx.beginPath();
 
@@ -38,6 +76,7 @@
         for(let i = 0; i < this.bufferLength; i++) {
 
           const v = this.dataArray[i] / 128.0;
+          debugger;
           const y = v * this.height/2;
 
           if(i === 0) {
@@ -56,13 +95,13 @@
 
     class Webenjolin {
       static infos = {
-        "osc1-sine": "Oscillator 1 has two outputs, a sine wave and a square wave. You are monitoring the sine wave. Oscillator 1's frequency is set by the initial frequency offset and modulated by Oscillator 2's sine wave and the Rungler output. Oscillator 1's sine wave in turn modulates Oscillator 2's frequency. Oscillator 1 and 2's sine waves are compared to create the Pulse Width Modulation output.",
-        "osc1-square": "Oscillator 1 has two outputs, a sine wave and a square wave. You are monitoring the square wave. Oscillator 1's frequency is set by the initial frequency offset and modulated by Oscillator 2's sine wave and the Rungler output. Oscillator 1's square wave is sampled by the Rungler to add bits to the Rungler's shift register.",
-        "osc2-sine": "Oscillator 2 has two outputs, a sine wave and a square wave. You are monitoring the sine wave. Oscillator 2's frequency is set by the initial frequency offset and modulated by Oscillator 1's sine wave and the Rungler output. Oscillator 2's sine wave in turn modulates Oscillator 1's frequency. Oscillator 1 and 2's sine waves are compared to create the Pulse Width Modulation output.",
-        "osc2-square": "Oscillator 2 has two outputs, a sine wave and a square wave. You are monitoring the square wave. Oscillator 2's frequency is set by the initial frequency offset and modulated by Oscillator 1's sine wave and the Rungler output. Oscillator 2's square wave is used as a clock for the Rungler, telling it when to sample Oscillator 1's square wave.",
-        "rungler": "The Rungler is a shift register that stores 8 bits. It's output is a signed 8 bit integer normalized to the range between -1 and 1. With each rising edge it recieves from Oscillator 2's square wave output, it removes the last bit from its register, shifts all the other bits by one position, and depending on a probability set by the 'Rungle' parameter, it will either move that last bit to the front of the register, or sample Oscillator 1's square wave output for a new bit. If Oscillator 1's wave is high, the bit will be a 1, if it is low, it will be a zero.",
-        "filter-filter": "The filter Section has three outputs, lowpass, highpass, and band pass. The filter's frequency is set by the initial frequency offset and modulated by the Rungler output. The filter's resonance is determined by the Q parameter. The signal being filtered, is the Pulse Width Modulation output.",
-        "pwm": "The Pulse Width Modulation output is the result of comparing Oscillator 1 and 2's sine waves. if Oscillator 1's sine wave is higher than Oscillator 2's sine wave, the PWM output is high. if Oscillator 1's sine wave is lower than Oscillator 2's sine wave, the PWM output is low.",
+        "osc1-sine": "<p>Oscillator 1 has two outputs, a sine wave and a square wave. You are monitoring the sine wave. Oscillator 1's frequency is set by the initial frequency offset and modulated by Oscillator 2's sine wave and the Rungler output. Oscillator 1's sine wave in turn modulates Oscillator 2's frequency. Oscillator 1 and 2's sine waves are compared to create the Pulse Width Modulation output.</p>",
+        "osc1-square": "<p>Oscillator 1 has two outputs, a sine wave and a square wave. You are monitoring the square wave. Oscillator 1's frequency is set by the initial frequency offset and modulated by Oscillator 2's sine wave and the Rungler output. Oscillator 1's square wave is sampled by the Rungler to add bits to the Rungler's shift register.</p>",
+        "osc2-sine": "<p>Oscillator 2 has two outputs, a sine wave and a square wave. You are monitoring the sine wave. Oscillator 2's frequency is set by the initial frequency offset and modulated by Oscillator 1's sine wave and the Rungler output. Oscillator 2's sine wave in turn modulates Oscillator 1's frequency. Oscillator 1 and 2's sine waves are compared to create the Pulse Width Modulation output.</p>",
+        "osc2-square": "<p>Oscillator 2 has two outputs, a sine wave and a square wave. You are monitoring the square wave. Oscillator 2's frequency is set by the initial frequency offset and modulated by Oscillator 1's sine wave and the Rungler output. Oscillator 2's square wave is used as a clock for the Rungler, telling it when to sample Oscillator 1's square wave.</p>",
+        "rungler": "<p>The Rungler is a shift register that stores 8 bits. It's output is a signed 8 bit integer normalized to the range between -1 and 1. With each rising edge it recieves from Oscillator 2's square wave output, it removes the last bit from its register, shifts all the other bits by one position, and depending on a probability set by the 'Rungle' parameter, it will either move that last bit to the front of the register, or sample Oscillator 1's square wave output for a new bit. If Oscillator 1's wave is high, the bit will be a 1, if it is low, it will be a zero.</p>",
+        "filter-filter": "<p>The filter Section has three outputs, lowpass, highpass, and band pass. The filter's frequency is set by the initial frequency offset and modulated by the Rungler output. The filter's resonance is determined by the Q parameter. The signal being filtered, is the Pulse Width Modulation output.</p>",
+        "pwm": "<p>The Pulse Width Modulation output is the result of comparing Oscillator 1 and 2's sine waves. if Oscillator 1's sine wave is higher than Oscillator 2's sine wave, the PWM output is high. if Oscillator 1's sine wave is lower than Oscillator 2's sine wave, the PWM output is low.</p>",
       };
 
       isRunning() {
@@ -98,7 +137,7 @@
       }
 
       updateInfo(nodepath) {
-        this.infoPane.innerText = Webenjolin.infos[nodepath];
+        this.infoPane.innerHTML = Webenjolin.infos[nodepath];
       }
 
       buildBenjolin() {
@@ -178,7 +217,7 @@
             param.frequency.setValueAtTime(freq, this.context.currentTime);
           });
 
-          requestAnimationFrame(() => document.querySelector("#" + name + " .hertz").innerText = freq);
+          requestAnimationFrame(() => document.querySelector("#" + name + " .hertz").innerText = freq > 1 || freq == 0 ? Math.ceil(freq) : freq.toFixed(3));
         }
       }
 
@@ -247,95 +286,125 @@
 </head>
 <body>
   <h1>weBenjolin</h1>
-  <p>we Benjolin or Web-Benjolin?</p>
-  <p>both!</p>
-  <p>this is an implementation of the Benjolin synthesizer design by Rob Hordijk, based on his Blippy Box</p>
-  <p>it is a chaotic noise maker that shows off many cool synthesizer techniques like:</p>
-  <ol>
-    <li>frequency modulation</li>
-    <li>pulse waves as clock signals</li>
-    <li>sequencing via shift register</li>
-    <li>feedback</li>
-  </ol>
-  <p>this version is implemented using the WebAudio API</p>
-  <p>you may hear the terrible noise it makes and think it's broken, rest assured, it is working properly :)</p>
-  <p>Are You Ready?</p>
+  <div id="intro">
+    <p>we Benjolin or Web-Benjolin?</p>
+    <p>both!</p>
+    <p>this is an implementation of the Benjolin synthesizer design by Rob Hordijk, based on his Blippy Box</p>
+    <p>it is a chaotic noise maker that shows off many cool synthesizer techniques like:</p>
+    <ol>
+      <li>frequency modulation</li>
+      <li>pulse waves as clock signals</li>
+      <li>sequencing via shift register</li>
+      <li>feedback</li>
+    </ol>
+    <p>this version is implemented using the WebAudio API</p>
+    <p>you may hear the terrible noise it makes and think it's broken, rest assured, it is working properly :)</p>
+    <p>Are You Ready?</p>
+  </div>
   <button type="button" id="start">Start</button>
   <canvas class="visualizer" width="640" height="100"></canvas>
   <div id="info"></div>
   <div id="gui">
-    <div id="osc1">
-      <h3>Osc 1</h3>
-      <label>Frequency: <span class="hertz">0</span>hz
+    <div id="controls" class="flex">
+      <section id="osc1">
+        <h3>Osc 1</h3>
+        <label>Frequency: <span class="hertz">0</span>hz
+          <br>
+          <input type="range" id="osc1-frequency" min="0" max="25" step="0.001" value="6">
+        </label>
+        <input type="range" id="osc1-fm" min="0" max="1000" value="0">
+        <input type="range" id="osc1-rungler" min="0" max="1000" value="0">
+      </section>
+      <section id="osc2">
+        <h3>Osc 2</h3>
+        <label>Frequency: <span class="hertz">0</span>hz</label>
         <br>
-        <input type="range" id="osc1-frequency" min="0" max="25" step="0.001" value="6">
-      </label>
-      <input type="range" id="osc1-fm" min="0" max="1000" value="0">
-      <input type="range" id="osc1-rungler" min="0" max="1000" value="0">
-      <label>
-        Sine
-        <input type="radio" value="osc1-sine" name="monitor">
-      </label>
-      <label>
-        Square
-        <input type="radio" value="osc1-square" name="monitor">
-      </label>
-    </div>
-    <div id="osc2">
-      <h3>Osc 2</h3>
-      <label>Frequency: <span class="hertz">0</span>hz</label>
-      <br>
-      <input type="range" id="osc2-frequency" min="0" max="25" step="0.001" value="5">
-      <input type="range" id="osc2-fm" min="0" max="1000" value="0">
-      <input type="range" id="osc2-rungler" min="0" max="1000" value="0">
-      <label>
-        Sine
-        <input type="radio" value="osc2-sine" name="monitor">
-      </label>
-      <label>
-        Square
-        <input type="radio" value="osc2-square" name="monitor">
-      </label>
-    </div>
-    <div id="rungler">
-      <h3>Rungler</h3>
-      <label>Rungle</label>
-      <br>
-      <input type="range" id="rungler-rungle" min="0" max="1" step="0.01">
-      <input type="radio" value="rungler" name="monitor">
-    </div>
-    <div id="filter">
-      <h3>Filter</h3>
-      <label>Frequency: <span class="hertz">0</span>hz</label>
-      <br>
-      <input type="range" id="filter-frequency" min="0" max="25" step="0.001">
-      <input type="range" id="filter-q" min="0" max="25" step="0.1">
-      <input type="range" id="filter-rungler" min="0" max="1000" value="0">
-      <div>
-        <h5>Filter Type</h5>
-        <label>
-          Lowpass
-          <input type="radio" value="lowpass" name="filter-type" checked>
-        </label>
-        <label>
-          Highpass
-          <input type="radio" value="highpass" name="filter-type">
-        </label>
-        <label>
-          Bandpass
-          <input type="radio" value="bandpass" name="filter-type">
-        </label>
-      </div>
-      <label>
-        Filter
-        <input type="radio" value="filter-filter" name="monitor">
-      </label>
+        <input type="range" id="osc2-frequency" min="0" max="25" step="0.001" value="5">
+        <input type="range" id="osc2-fm" min="0" max="1000" value="0">
+        <input type="range" id="osc2-rungler" min="0" max="1000" value="0">
+      </section>
+      <section id="rungler">
+        <h3>Rungler</h3>
+        <label>Rungle</label>
+        <br>
+        <input type="range" id="rungler-rungle" min="0" max="1" step="0.01">
+      </section>
+      <section id="filter">
+        <h3>Filter</h3>
+        <label>Frequency: <span class="hertz">0</span>hz</label>
+        <br>
+        <input type="range" id="filter-frequency" min="0" max="25" step="0.001">
+        <input type="range" id="filter-q" min="0" max="25" step="0.1">
+        <input type="range" id="filter-rungler" min="0" max="1000" value="0">
+        <div class="flex column">
+          <h5>Filter Type</h5>
+          <label>
+            Lowpass
+            <input type="radio" value="lowpass" name="filter-type" checked>
+          </label>
+          <label>
+            Highpass
+            <input type="radio" value="highpass" name="filter-type">
+          </label>
+          <label>
+            Bandpass
+            <input type="radio" value="bandpass" name="filter-type">
+          </label>
+        </div>
+      </section>
     </div>
     <div id="output">
-      <label>
-        PWM
-        <input type="radio" value="pwm" name="monitor">
-      </label>
+      <h2>Outputs</h2>
+      <div class="flex">
+        <section>
+          <h3>Osc 1</h3>
+          <div class="flex column">
+            <label>
+              Sine
+              <input type="radio" value="osc1-sine" name="monitor">
+            </label>
+            <label>
+              Square
+              <input type="radio" value="osc1-square" name="monitor">
+            </label>
+          </div>
+        </section>
+        <section>
+          <h3>Osc 2</h3>
+          <div class="flex column">
+            <label>
+              Sine
+              <input type="radio" value="osc2-sine" name="monitor">
+            </label>
+            <label>
+              Square
+              <input type="radio" value="osc2-square" name="monitor">
+            </label>
+          </div>
+        </section>
+        <section>
+          <h3>Rungler</h3>
+          <div class="flex column">
+            <label>
+              Rungler
+              <input type="radio" value="rungler" name="monitor">
+            </label>
+          </div>
+        </section>
+        <section>
+          <h3>Filter</h3>
+          <div class="flex column">
+            <label>
+              PWM
+              <input type="radio" value="pwm" name="monitor">
+            </label>
+            <label>
+              Filter
+              <input type="radio" value="filter-filter" name="monitor">
+            </label>
+          </div>
+        </section>
+      </div>
     </div>
   </div>
 </body>
