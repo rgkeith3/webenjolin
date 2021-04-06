@@ -6,7 +6,7 @@
   <style>
     body {
       background: black;
-      width: 50%;
+      width: 80%;
       margin: auto;
     }
     .flex {
@@ -17,6 +17,12 @@
     }
     .flex.column {
       flex-direction: column;
+    }
+    #gui {
+      flex-basis: 80%;
+    }
+    #info {
+      flex-basis: 20%;
     }
     h1, h2, h3, h5, button {
       font-family: 'Goldman', cursive;
@@ -318,130 +324,132 @@
   </div>
   <button type="button" id="start">Start</button>
   <canvas class="visualizer" width="640" height="100"></canvas>
-  <div id="info"></div>
-  <div id="gui">
-    <div id="controls" class="flex">
-      <section id="osc1">
-        <h3>Osc 1</h3>
-        <div class="flex column">
-          <label for="osc1-frequency">Frequency: <span class="hertz">0</span>hz</label>
-          <input type="range" id="osc1-frequency" min="0" max="25" step="0.001" value="6">
-        </div>
-        <div class="flex column">
-          <label for="osc1-fm">FM</label>
-          <input type="range" id="osc1-fm" min="0" max="1000" value="0">
-        </div>
-        <div class="flex column">
-          <label for="osc1-rungler">Rungler</label>
-          <input type="range" id="osc1-rungler" min="0" max="1000" value="0">
-        </div>
-      </section>
-      <section id="osc2">
-        <h3>Osc 2</h3>
-        <div class="flex column">
-          <label for="osc2-frequency">Frequency: <span class="hertz">0</span>hz</label>
-          <input type="range" id="osc2-frequency" min="0" max="25" step="0.001" value="5">
-        </div>
-        <div class="flex column">
-          <label for="osc2-fm">FM</label>
-          <input type="range" id="osc2-fm" min="0" max="1000" value="0">
-        </div>
-        <div class="flex column">
-          <label for="osc2-rungler">Rungler</label>
-          <input type="range" id="osc2-rungler" min="0" max="1000" value="0">
-        </div>
-      </section>
-      <section id="rungler">
-        <h3>Rungler</h3>
-        <div class="flex column">
-          <label for="rungler-rungle">Rungle</label>
-          <input type="range" id="rungler-rungle" min="0" max="1" step="0.01">
-        </div>
-      </section>
-      <section id="filter">
-        <h3>Filter</h3>
-        <div class="flex column">
-          <label for="filter-frequency">Frequency: <span class="hertz">0</span>hz</label>
-          <input type="range" id="filter-frequency" min="0" max="25" step="0.001">
-        </div>
-        <div class="flex column">
-          <label for="filter-q">Resonance</label>
-          <input type="range" id="filter-q" min="0" max="25" step="0.1">
-        </div>
-        <div class="flex column">
-          <label for="filter-rungler">Rungler</label>
-          <input type="range" id="filter-rungler" min="0" max="1000" value="0">
-        </div>
-        <div class="flex column">
-          <h5>Filter Type</h5>
-          <label>
-            Lowpass
-            <input id="lowpass" type="radio" value="lowpass" name="filter-type" checked>
-          </label>
-          <label>
-            Highpass
-            <input id="highpass" type="radio" value="highpass" name="filter-type">
-          </label>
-          <label>
-            Bandpass
-            <input id="bandpass" type="radio" value="bandpass" name="filter-type">
-          </label>
-        </div>
-      </section>
-    </div>
-    <div id="output">
-      <h2>Outputs</h2>
-      <div class="flex">
-        <section>
+  <div class="flex">
+    <div id="gui">
+      <div id="controls" class="flex">
+        <section id="osc1">
           <h3>Osc 1</h3>
           <div class="flex column">
-            <label>
-              Sine
-              <input id="osc1-sine" type="radio" value="osc1-sine" name="monitor">
-            </label>
-            <label>
-              Square
-              <input id="osc1-square" type="radio" value="osc1-square" name="monitor">
-            </label>
+            <label for="osc1-frequency">Frequency: <span class="hertz">0</span>hz</label>
+            <input type="range" id="osc1-frequency" min="0" max="25" step="0.001" value="6">
+          </div>
+          <div class="flex column">
+            <label for="osc1-fm">FM</label>
+            <input type="range" id="osc1-fm" min="0" max="1000" value="0">
+          </div>
+          <div class="flex column">
+            <label for="osc1-rungler">Rungler</label>
+            <input type="range" id="osc1-rungler" min="0" max="1000" value="0">
           </div>
         </section>
-        <section>
+        <section id="osc2">
           <h3>Osc 2</h3>
           <div class="flex column">
-            <label>
-              Sine
-              <input id="osc2-sine" type="radio" value="osc2-sine" name="monitor">
-            </label>
-            <label>
-              Square
-              <input id="osc2-square" type="radio" value="osc2-square" name="monitor">
-            </label>
+            <label for="osc2-frequency">Frequency: <span class="hertz">0</span>hz</label>
+            <input type="range" id="osc2-frequency" min="0" max="25" step="0.001" value="5">
+          </div>
+          <div class="flex column">
+            <label for="osc2-fm">FM</label>
+            <input type="range" id="osc2-fm" min="0" max="1000" value="0">
+          </div>
+          <div class="flex column">
+            <label for="osc2-rungler">Rungler</label>
+            <input type="range" id="osc2-rungler" min="0" max="1000" value="0">
           </div>
         </section>
-        <section>
+        <section id="rungler">
           <h3>Rungler</h3>
           <div class="flex column">
-            <label>
-              Rungler
-              <input id="rungler" type="radio" value="rungler" name="monitor">
-            </label>
+            <label for="rungler-rungle">Rungle</label>
+            <input type="range" id="rungler-rungle" min="0" max="1" step="0.01">
           </div>
         </section>
-        <section>
+        <section id="filter">
           <h3>Filter</h3>
           <div class="flex column">
+            <label for="filter-frequency">Frequency: <span class="hertz">0</span>hz</label>
+            <input type="range" id="filter-frequency" min="0" max="25" step="0.001">
+          </div>
+          <div class="flex column">
+            <label for="filter-q">Resonance</label>
+            <input type="range" id="filter-q" min="0" max="25" step="0.1">
+          </div>
+          <div class="flex column">
+            <label for="filter-rungler">Rungler</label>
+            <input type="range" id="filter-rungler" min="0" max="1000" value="0">
+          </div>
+          <div class="flex column">
+            <h5>Filter Type</h5>
             <label>
-              PWM
-              <input id="pwm" type="radio" value="pwm" name="monitor">
+              Lowpass
+              <input id="lowpass" type="radio" value="lowpass" name="filter-type" checked>
             </label>
             <label>
-              Filter
-              <input id="filter-filter" type="radio" value="filter-filter" name="monitor">
+              Highpass
+              <input id="highpass" type="radio" value="highpass" name="filter-type">
+            </label>
+            <label>
+              Bandpass
+              <input id="bandpass" type="radio" value="bandpass" name="filter-type">
             </label>
           </div>
         </section>
       </div>
+      <div id="output">
+        <h2>Outputs</h2>
+        <div class="flex">
+          <section>
+            <h3>Osc 1</h3>
+            <div class="flex column">
+              <label>
+                Sine
+                <input id="osc1-sine" type="radio" value="osc1-sine" name="monitor">
+              </label>
+              <label>
+                Square
+                <input id="osc1-square" type="radio" value="osc1-square" name="monitor">
+              </label>
+            </div>
+          </section>
+          <section>
+            <h3>Osc 2</h3>
+            <div class="flex column">
+              <label>
+                Sine
+                <input id="osc2-sine" type="radio" value="osc2-sine" name="monitor">
+              </label>
+              <label>
+                Square
+                <input id="osc2-square" type="radio" value="osc2-square" name="monitor">
+              </label>
+            </div>
+          </section>
+          <section>
+            <h3>Rungler</h3>
+            <div class="flex column">
+              <label>
+                Rungler
+                <input id="rungler" type="radio" value="rungler" name="monitor">
+              </label>
+            </div>
+          </section>
+          <section>
+            <h3>Filter</h3>
+            <div class="flex column">
+              <label>
+                PWM
+                <input id="pwm" type="radio" value="pwm" name="monitor">
+              </label>
+              <label>
+                Filter
+                <input id="filter-filter" type="radio" value="filter-filter" name="monitor" checked>
+              </label>
+            </div>
+          </section>
+        </div>
+      </div>
     </div>
+    <div id="info"></div>
   </div>
 </body>
 </html>
